@@ -72,12 +72,19 @@ def copy_to_menu(text):
 
 def stabilize_shell():
     options = ['python3', 'python']
+    # get tty size
+    # tmux list-panes | grep active | cut -d '[' -f 2 | cut -d ']' -f 1
+    if os.getenv('TTY_SIZE') is None:
+        ttysize = os.popen("tmux list-panes | grep active | cut -d '[' -f 2 | cut -d ']' -f 1").readline().strip('\n')
+    else:
+        ttysize = os.getenv('TTY_SIZE') # format COLSxROWS
+    [cols, rows] = ttysize.split('x')
     index = TerminalMenu(options).show()
     py = options[index]
     pane = select_pane()
     cmd = f"tmux send-keys -t {pane} {py} Space -c Space \\' 'import pty;pty.spawn(\"/bin/bash\")' \\' Enter"
     os.system(cmd)
-    cmd = f"tmux send-keys -t {pane} C-z 'stty size' Enter 'stty raw -echo; fg' Enter '' Enter 'stty rows 60 cols 235' Enter 'export TERM=xterm' Enter"
+    cmd = f"tmux send-keys -t {pane} C-z 'stty size' Enter 'stty raw -echo; fg' Enter '' Enter 'stty rows {rows} cols {cols}' Enter 'export TERM=xterm' Enter"
     os.system(cmd)
 
 def get_apache_file(pattern):
