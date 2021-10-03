@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 from simple_term_menu import TerminalMenu
+
 import os
 import string
 import random
 import base64
 import sys
+import dotenv
 
 popup_mode = False
 
@@ -28,7 +30,9 @@ def interfaces():
     return interfaces[index].split(' ')[0]
 
 def get_interface_ip():
-    return get_ip(interfaces())
+    configIp = os.getenv('ATTACKER_IP')
+    if configIp is not None: return configIp
+    else: return get_ip(interfaces())
 
 def strip_lines(lines):
     # return list(map(lambda x: x.strip('\n '), lines))
@@ -327,14 +331,32 @@ def windows_menu():
     elif index == 3:
         nishang_shell_menu()
 
+def set_custom_ip(ip):
+    configFile = dotenv.find_dotenv('.tmux-pwn-env')
+    f = open(configFile, 'a')
+    f.writelines([f"ATTACKER_IP={ip}"])
+    f.close()
+
+def clear_custom_ip():
+    # file=$(mktemp); cat .tmux-pwn-env | grep -v ATTACKER_IP > $file; mv $file ./.tmux-pwn-env
+    configFile = dotenv.find_dotenv('.tmux-pwn-env')
+    os.system(f"file=$(mktemp); cat {configFile} | grep -v ATTACKER_IP > $file; mv $file {configFile}")
+
 def main():
     global popup_mode
+    # print(dotenv.find_dotenv('.tmux-pwn-env'))
+    dotenv.load_dotenv('.tmux-pwn-env')
     popup_mode = True
     if len(sys.argv) >= 2:
         if sys.argv[1] == 'pane': 
             popup_mode = False
     os.system("pwd")
     options = ["Copy my IP", "Linux shell commands", "Windows shell commands", "Copy python HTTP", "MSFVenom", "Start apache", "Stop apache"]
+    
+    hasCustomIp = os.getenv('ATTACKER_IP') is not None
+    if hasCustomIp: options.append('Remove Custom IP')
+    else: options.append('Set Custom IP')
+
     index = TerminalMenu(options).show()
     print(options[index])
     if index == 0:
@@ -357,6 +379,9 @@ def main():
     elif index == 6:
         print("Stopping apache... sudo required")
         os.system("sudo systemctl stop apache2")
+    elif index == 7: # custom IP
+        if hasCustomIp: clear_custom_ip()
+        else: set_custom_ip(input("Enter IP: "))
 
 if __name__ == "__main__":
     main()
