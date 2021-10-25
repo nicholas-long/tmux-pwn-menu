@@ -264,7 +264,8 @@ def msfvenom_generate_menu(ip, directory):
     # if meterpreter, generate RC file as well to launch msfconsole with the right kind of multi/handler listener
     if shellType == 'meterpreter':
         filename = f"listen-{randomName}.rc"
-        f = open(filename, 'w') # put in current working directory
+        fullpath = f"{directory}{filename}"
+        f = open(fullpath, 'w') # put in current working directory
         f.write(f"""use multi/handler
 set payload {payload}
 set lhost {ip}
