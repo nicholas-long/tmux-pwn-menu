@@ -65,10 +65,10 @@ def copy_to_pane(text):
     os.system(f"tmux send-keys -t {pane} '{text}'")
     
 def copy_to_menu(text):
-    options = ["To tmux buffer", "To tmux pane..."]
+    options = ["type in tmux pane", "copy to tmux buffer"]
     index = TerminalMenu(options).show()
-    if index == 0: copy_to_tmux(text)
-    elif index == 1: copy_to_pane(text)
+    if index == 0: copy_to_pane(text)
+    elif index == 1: copy_to_tmux(text)
 
 def stabilize_shell():
     options = ['python3', 'python']
@@ -399,3 +399,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
