@@ -84,7 +84,7 @@ def stabilize_shell():
     pane = select_pane()
     cmd = f"tmux send-keys -t {pane} {py} Space -c Space \\' 'import pty;pty.spawn(\"/bin/bash\")' \\' Enter"
     os.system(cmd)
-    cmd = f"tmux send-keys -t {pane} C-z 'stty size' Enter 'stty raw -echo; fg' Enter '' Enter 'stty rows {rows} cols {cols}' Enter 'export TERM=xterm' Enter"
+    cmd = f"tmux send-keys -t {pane} C-z 'stty size' Enter 'stty raw -echo; fg; reset' Enter '' Enter 'stty rows {rows} cols {cols}' Enter 'export TERM=xterm-256color' Enter"
     os.system(cmd)
 
 def get_apache_file(pattern):
